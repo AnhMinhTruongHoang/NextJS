@@ -23,15 +23,10 @@ declare global {
     updateAt: string;
   }
 
-  interface ITrackContext {
-    currentTrack: IShareTrack;
-    setCurrentTrack: (v: IShareTrack) => void;
-  }
-
   interface IShareTrack extends ITracksTop {
     isPlaying: boolean;
   }
-
+  
   interface ITrackContext {
     currentTrack: IShareTrack;
     setCurrentTrack: (v: IShareTrack) => void;

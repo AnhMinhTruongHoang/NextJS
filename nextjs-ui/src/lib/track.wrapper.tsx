@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState } from "react";
 
 export const TrackContext = createContext<ITrackContext | null>(null);
 
@@ -26,8 +26,8 @@ export const TrackContextProvider = ({
       type: "",
     },
     isDeleted: false,
-    createdAt: "",
-    updatedAt: "",
+    createAt: "",
+    updateAt: "",
     isPlaying: false,
   };
   const [currentTrack, setCurrentTrack] = useState<IShareTrack>(initValue);

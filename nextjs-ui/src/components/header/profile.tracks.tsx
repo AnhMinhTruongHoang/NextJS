@@ -1,62 +1,102 @@
 "use client";
 
 import { useTheme } from "@mui/material/styles";
-import Box from "@mui/material/Box";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import CardMedia from "@mui/material/CardMedia";
-import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
+import { Box, Card, IconButton, Typography, Avatar } from "@mui/material";
 import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import SkipNextIcon from "@mui/icons-material/SkipNext";
-import { ListItem } from "@mui/material";
+import { PauseCircleOutline } from "@mui/icons-material";
+import { useTrackContext } from "@/lib/track.wrapper";
 
-const ProfileTracks = (props: any) => {
-  const { data } = props;
+const ProfileTracks = ({ data }: any) => {
   const theme = useTheme();
+  const { currentTrack, setCurrentTrack } = useTrackContext() as ITrackContext;
 
   return (
-    <Card sx={{ display: "flex", justifyContent: "space-between" }}>
-      <Box sx={{ display: "flex", flexDirection: "column" }}>
-        <CardContent sx={{ flex: "1 0 auto" }}>
-          <Typography component="div" variant="h5">
-            {data.title}
-          </Typography>
-          <Typography
-            variant="subtitle1"
-            color="text.secondary"
-            component="div"
-          >
-            {data.description}
-          </Typography>
-        </CardContent>
-        <Box sx={{ display: "flex", alignItems: "center", pl: 1, pb: 1 }}>
-          <IconButton aria-label="previous">
-            {theme.direction === "rtl" ? (
-              <SkipNextIcon />
-            ) : (
-              <SkipPreviousIcon />
-            )}
-          </IconButton>
-          <IconButton aria-label="play/pause">
-            <PlayArrowIcon sx={{ height: 38, width: 38 }} />
-          </IconButton>
-          <IconButton aria-label="next">
-            {theme.direction === "rtl" ? (
-              <SkipPreviousIcon />
-            ) : (
-              <SkipNextIcon />
-            )}
-          </IconButton>
+    <Card
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        backgroundColor: "#fff",
+        borderRadius: 3,
+        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+        padding: 2,
+        mb: 2,
+        transition: "transform 0.2s",
+        "&:hover": {
+          transform: "scale(1.02)",
+        },
+      }}
+    >
+      <Avatar
+        variant="rounded"
+        src={`http://localhost:8000/images/${data.imgUrl}`}
+        alt={data.title}
+        sx={{ width: 80, height: 80, mr: 2 }}
+      />
+
+      <Box sx={{ flex: 1 }}>
+        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+          {data.title}
+        </Typography>
+        <Typography variant="body2" color="text.secondary" noWrap>
+          {data.description}
+        </Typography>
+
+        {/* Fake waveform visual or progress bar */}
+        <Box
+          sx={{
+            height: 4,
+            width: "100%",
+            backgroundColor: "#eee",
+            borderRadius: 2,
+            mt: 1,
+            mb: 0.5,
+          }}
+        >
+          <Box
+            sx={{
+              height: "100%",
+              width: "30%",
+              backgroundColor: theme.palette.primary.main,
+              borderRadius: 2,
+            }}
+          />
         </Box>
       </Box>
-      <CardMedia
-        component="img"
-        sx={{ width: 151 }}
-        image={`http://localhost:8000/images/${data.imgUrl}`}
-        alt="Live from space album cover"
-      />
+
+      <Box>
+        <IconButton>
+          {theme.direction === "rtl" ? <SkipNextIcon /> : <SkipPreviousIcon />}
+        </IconButton>
+        {(data._id !== currentTrack._id ||
+          (data._id === currentTrack._id &&
+            currentTrack.isPlaying === false)) && (
+          <IconButton
+            aria-label="play/pause"
+            onClick={(e) => {
+              setCurrentTrack({ ...data, isPlaying: true });
+            }}
+          >
+            <PlayArrowIcon sx={{ height: 38, width: 38 }} />
+          </IconButton>
+        )}
+
+        {data._id === currentTrack._id && currentTrack.isPlaying === true && (
+          <IconButton
+            aria-label="play/pause"
+            onClick={(e) => {
+              setCurrentTrack({ ...data, isPlaying: false });
+            }}
+          >
+            <PauseCircleOutline sx={{ height: 38, width: 38 }} />
+          </IconButton>
+        )}
+
+        <IconButton>
+          {theme.direction === "rtl" ? <SkipPreviousIcon /> : <SkipNextIcon />}
+        </IconButton>
+      </Box>
     </Card>
   );
 };

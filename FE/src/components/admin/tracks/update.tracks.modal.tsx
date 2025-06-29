@@ -1,0 +1,202 @@
+import React, { useState, useEffect } from "react";
+import { Modal, Input, notification, Select, Form, InputNumber } from "antd";
+import { ITracks } from "./tracks.table";
+
+const { Option } = Select;
+interface IProps {
+  access_token: string;
+  getData: any;
+  isUpdateModalOpen: boolean;
+  setIsUpdateModalOpen: (v: boolean) => void;
+  dataUpdate: null | ITracks;
+  setDataUpdate: any;
+}
+
+const UpdateTrackModal = (props: IProps) => {
+  const {
+    access_token,
+    getData,
+    isUpdateModalOpen,
+    setIsUpdateModalOpen,
+    dataUpdate,
+    setDataUpdate,
+  } = props;
+
+  const [form] = Form.useForm();
+
+  useEffect(() => {
+    if (dataUpdate) {
+      //code
+      form.setFieldsValue({
+        title: dataUpdate.title,
+        description: dataUpdate.description,
+        category: dataUpdate.category,
+        trackUrl: dataUpdate.trackUrl,
+      });
+    }
+  }, [dataUpdate]);
+
+  const handleCloseCreateModal = () => {
+    setIsUpdateModalOpen(false);
+    form.resetFields();
+    setDataUpdate(null);
+  };
+
+  const onFinish = async (values: any) => {
+    const { name, email, age, gender, role, address, company } = values;
+    if (dataUpdate) {
+      const data = {
+        _id: dataUpdate._id,
+        name,
+        email,
+        age,
+        gender,
+        role,
+        address,
+        company: { _id: company, name: "None" },
+      };
+
+      const res = await fetch(
+        `http://localhost:8000/api/v1/users/${dataUpdate._id}`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        }
+      );
+
+      const d = await res.json();
+      if (d.data) {
+        //success
+        await getData();
+        notification.success({
+          message: "Cập nhật user thành công.",
+        });
+        handleCloseCreateModal();
+      } else {
+        ///
+        notification.error({
+          message: "Có lỗi xảy ra",
+          description: JSON.stringify(d.message),
+        });
+      }
+    }
+  };
+
+  return (
+    <Modal
+      title={<div style={{ textAlign: "center" }}>Update user</div>}
+      open={isUpdateModalOpen}
+      onOk={() => form.submit()}
+      onCancel={() => handleCloseCreateModal()}
+      maskClosable={false}
+    >
+      <Form name="basic" onFinish={onFinish} layout="vertical" form={form}>
+        <Form.Item
+          style={{ marginBottom: 5 }}
+          label="Name"
+          name="name"
+          rules={[{ required: true, message: "Please input your name!" }]}
+        >
+          <Input />
+        </Form.Item>
+
+        <Form.Item
+          style={{ marginBottom: 5 }}
+          label="Email"
+          name="email"
+          rules={[{ required: true, message: "Please input your email!" }]}
+        >
+          <Input type="email" />
+        </Form.Item>
+
+        <Form.Item
+          style={{ marginBottom: 5 }}
+          label="Password"
+          name="password"
+          rules={[
+            {
+              required: dataUpdate ? false : true,
+              message: "Please input your password!",
+            },
+          ]}
+        >
+          <Input.Password disabled={dataUpdate ? true : false} />
+        </Form.Item>
+        <Form.Item
+          style={{ marginBottom: 5 }}
+          label="Age"
+          name="age"
+          rules={[{ required: true, message: "Please input your age!" }]}
+        >
+          <InputNumber style={{ width: "100%" }} />
+        </Form.Item>
+
+        <Form.Item
+          style={{ marginBottom: 5 }}
+          label="Address"
+          name="address"
+          rules={[{ required: true, message: "Please input your address!" }]}
+        >
+          <Input />
+        </Form.Item>
+
+        <Form.Item
+          style={{ marginBottom: 5 }}
+          name="gender"
+          label="Gender"
+          rules={[{ required: true }]}
+        >
+          <Select
+            placeholder="Select a option and change input text above"
+            // onChange={onGenderChange}
+            allowClear
+          >
+            <Option value="MALE">male</Option>
+            <Option value="FEMALE">female</Option>
+            <Option value="OTHER">other</Option>
+          </Select>
+        </Form.Item>
+
+        <Form.Item
+          style={{ marginBottom: 5 }}
+          name="role"
+          label="Role"
+          rules={[{ required: true }]}
+        >
+          <Select
+            placeholder="Select a option and change input text above"
+            // onChange={onGenderChange}
+            allowClear
+          >
+            <Option value="USER">User</Option>
+            <Option value="ADMIN">Admin</Option>
+          </Select>
+        </Form.Item>
+
+        <Form.Item
+          hidden
+          label="Company"
+          name="company"
+          initialValue="64871777c7573fac797f83f6"
+          style={{ marginBottom: 5 }}
+          rules={[
+            {
+              required: dataUpdate ? false : true,
+              message: "Please input your Company!",
+            },
+          ]}
+        >
+          <Select disabled={dataUpdate ? true : false}>
+            <Option value="64871777c7573fac797f83f6">Company XYZ</Option>
+          </Select>
+        </Form.Item>
+      </Form>
+    </Modal>
+  );
+};
+
+export default UpdateTrackModal;

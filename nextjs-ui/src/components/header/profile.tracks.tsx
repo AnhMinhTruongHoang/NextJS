@@ -1,7 +1,7 @@
 "use client";
 
 import { useTheme } from "@mui/material/styles";
-import { Box, Card, IconButton, Typography, Avatar } from "@mui/material";
+import { Box, Card, IconButton, Typography, Avatar, Link } from "@mui/material";
 import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import SkipNextIcon from "@mui/icons-material/SkipNext";
@@ -36,14 +36,18 @@ const ProfileTracks = ({ data }: any) => {
       />
 
       <Box sx={{ flex: 1 }}>
-        <Typography variant="h6" sx={{ fontWeight: 600 }}>
-          {data.title}
-        </Typography>
-        <Typography variant="body2" color="text.secondary" noWrap>
-          {data.description}
-        </Typography>
+        <Link
+          href={`/track/${data.__id}?audio=${data.trackUrl}&id=${data._id}`}
+          underline="none"
+        >
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            {data.title}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" noWrap>
+            {data.description}
+          </Typography>
+        </Link>
 
-        {/* Fake waveform visual or progress bar */}
         <Box
           sx={{
             height: 4,
@@ -69,6 +73,7 @@ const ProfileTracks = ({ data }: any) => {
         <IconButton>
           {theme.direction === "rtl" ? <SkipNextIcon /> : <SkipPreviousIcon />}
         </IconButton>
+
         {(data._id !== currentTrack._id ||
           (data._id === currentTrack._id &&
             currentTrack.isPlaying === false)) && (

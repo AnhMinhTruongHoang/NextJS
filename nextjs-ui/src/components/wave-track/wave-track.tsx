@@ -9,18 +9,23 @@ import PauseIcon from "@mui/icons-material/Pause";
 import "./wave.scss";
 import { Tooltip } from "@mui/material";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
+import { sendRequest } from "@/utils/api";
+import noIMG from "../../../public/images/noimage.png";
+import { useTrackContext } from "@/lib/track.wrapper";
 
-const WaveTrack = () => {
-  const router = useRouter();
-  const firstViewRef = useRef(true);
+interface IProps {
+  track: ITracksTop | null;
+}
 
+const WaveTrack = (props: IProps) => {
+  const { track } = props;
   const searchParams = useSearchParams();
   const fileName = searchParams.get("audio");
   const containerRef = useRef<HTMLDivElement>(null);
   const hoverRef = useRef<HTMLDivElement>(null);
   const [time, setTime] = useState<string>("0:00");
   const [duration, setDuration] = useState<string>("0:00");
+  const { currentTrack, setCurrentTrack } = useTrackContext() as ITrackContext;
 
   const optionsMemo = useMemo((): Omit<WaveSurferOptions, "container"> => {
     let gradient, progressGradient;
@@ -134,6 +139,24 @@ const WaveTrack = () => {
     return `${percent}%`;
   };
 
+  useEffect(() => {
+    if (track?._id === currentTrack?._id && wavesurfer) {
+      currentTrack.isPlaying ? wavesurfer.pause() : wavesurfer.play();
+    }
+  }, [currentTrack]);
+
+  useEffect(() => {
+    if (wavesurfer && currentTrack.isPlaying) {
+      wavesurfer.pause();
+    }
+  }, [currentTrack]);
+
+  useEffect(() => {
+    if (track?._id && !currentTrack?._id) {
+      setCurrentTrack({ ...track, isPlaying: false });
+    }
+  }, [track]);
+
   return (
     <div style={{ marginTop: 20 }}>
       <div
@@ -141,47 +164,82 @@ const WaveTrack = () => {
           display: "flex",
           gap: 15,
           padding: 20,
-          height: 400,
+          height: 250,
           background:
             "linear-gradient(135deg, rgb(106, 112, 67) 0%, rgb(11, 15, 20) 100%)",
         }}
       >
+        {/* Left Side (Text + Waveform) */}
         <div
-          className="left"
           style={{
             width: "75%",
-            height: "calc(100% - 10px)",
             display: "flex",
             flexDirection: "column",
             justifyContent: "space-between",
           }}
         >
-          <div className="info" style={{ display: "flex" }}>
-            <div>
+          {track?.title}
+          <div style={{ display: "flex", alignItems: "center", gap: 15 }}>
+            {/* Play Button */}
+            <div
+              onClick={() => {
+                onPlayClick();
+                if (track && wavesurfer) {
+                  setCurrentTrack({
+                    ...currentTrack,
+                    isPlaying: false,
+                  });
+                }
+              }}
+              style={{
+                borderRadius: "50%",
+                background: "#f50",
+                height: "50px",
+                width: "50px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+              }}
+            >
+              {isPlaying ? (
+                <PauseIcon sx={{ fontSize: 30, color: "white" }} />
+              ) : (
+                <PlayArrowIcon sx={{ fontSize: 30, color: "white" }} />
+              )}
+            </div>
+
+            {/* Title + Host */}
+            <div style={{ display: "flex", flexDirection: "column" }}>
               <div
-                onClick={() => {
-                  onPlayClick();
-                }}
                 style={{
-                  borderRadius: "50%",
-                  background: "#f50",
-                  height: "50px",
-                  width: "50px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
+                  color: "white",
+                  fontWeight: "bold",
+                  fontSize: "18px",
+                  padding: "4px 8px",
+                  background: "rgba(0,0,0,0.4)",
+                  borderRadius: "4px",
                 }}
               >
-                {isPlaying === true ? (
-                  <PauseIcon sx={{ fontSize: 30, color: "white" }} />
-                ) : (
-                  <PlayArrowIcon sx={{ fontSize: 30, color: "white" }} />
-                )}
+                {track?.title || "Đang tải tiêu đề..."}
+              </div>
+              <div
+                style={{
+                  color: "#ccc",
+                  fontSize: "14px",
+                  padding: "2px 6px",
+                  background: "rgba(0,0,0,0.2)",
+                  borderRadius: "4px",
+                  marginTop: "4px",
+                  width: "fit-content",
+                }}
+              >
+                with {track?.uploader?.name || track?.description}
               </div>
             </div>
-            <div style={{ marginLeft: 20 }}></div>
           </div>
+
+          {/* Waveform */}
           <div ref={containerRef} className="wave-form-container">
             <div className="time">{time}</div>
             <div className="duration">{duration}</div>
@@ -193,11 +251,32 @@ const WaveTrack = () => {
                 height: "30px",
                 width: "100%",
                 bottom: "0",
-                // background: "#ccc"
                 backdropFilter: "brightness(0.5)",
               }}
             ></div>
           </div>
+        </div>
+
+        {/* Right Side (Image Placeholder) */}
+        <div
+          style={{
+            width: "25%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <img
+            src={typeof track?.imgUrl === "string" ? track?.imgUrl : noIMG.src}
+            alt="No image"
+            style={{
+              width: "100%",
+              height: "auto",
+              maxHeight: "200px",
+              objectFit: "cover",
+              background: "#ccc",
+            }}
+          />
         </div>
       </div>
     </div>

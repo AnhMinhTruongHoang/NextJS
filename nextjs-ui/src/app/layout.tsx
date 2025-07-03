@@ -14,7 +14,9 @@ export default function RootLayout({
         <ThemeRegistry>
           <NextAuthWrapper>
             <ToastProvider>
-              <TrackContextProvider>{children}</TrackContextProvider>
+              <TrackContextProvider>
+                <div style={{ marginBottom: "100px" }}>{children}</div>
+              </TrackContextProvider>
             </ToastProvider>
           </NextAuthWrapper>
         </ThemeRegistry>

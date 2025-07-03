@@ -1,5 +1,5 @@
 import queryString from "query-string";
-import slugify from 'slugify';
+import slugify from "slugify";
 
 export const sendRequest = async <T>(props: IRequest) => {
   let {
@@ -84,9 +84,9 @@ export const sendRequestFile = async <T>(props: IRequest) => {
 };
 
 export const fetchDefaultImages = (type: string) => {
-  if (type === "GITHUB") return "/user/default-github.png";
-  if (type === "GOOGLE") return "/user/default-google.png";
-  return "/user/default-user.png";
+  if (type === "GITHUB") return "/images/gitwar.png";
+  if (type === "GOOGLE") return "/images/gitwar.png";
+  return "/images/noimage.png";
 };
 
 export const convertSlugUrl = (str: string) => {

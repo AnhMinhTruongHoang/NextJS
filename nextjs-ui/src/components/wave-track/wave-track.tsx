@@ -8,17 +8,23 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
 import "./wave.scss";
 import { Tooltip } from "@mui/material";
-import { useRouter } from "next/navigation";
-import { sendRequest } from "@/utils/api";
-import noIMG from "../../../public/images/noimage.png";
 import { useTrackContext } from "@/lib/track.wrapper";
+import { fetchDefaultImages, sendRequest } from "@/utils/api";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import LikeTrack from "../like/like.track";
+import CommentTrack from "../comments/commentTrack";
 
 interface IProps {
   track: ITracksTop | null;
+  comments: ITrackComment[];
 }
 
 const WaveTrack = (props: IProps) => {
-  const { track } = props;
+  const { track, comments } = props;
+  const router = useRouter();
+  const firstViewRef = useRef(true);
+
   const searchParams = useSearchParams();
   const fileName = searchParams.get("audio");
   const containerRef = useRef<HTMLDivElement>(null);
@@ -140,22 +146,38 @@ const WaveTrack = (props: IProps) => {
   };
 
   useEffect(() => {
-    if (track?._id === currentTrack?._id && wavesurfer) {
-      currentTrack.isPlaying ? wavesurfer.pause() : wavesurfer.play();
-    }
-  }, [currentTrack]);
-
-  useEffect(() => {
     if (wavesurfer && currentTrack.isPlaying) {
       wavesurfer.pause();
     }
   }, [currentTrack]);
 
   useEffect(() => {
-    if (track?._id && !currentTrack?._id) {
+    if (track?._id && !currentTrack?._id)
       setCurrentTrack({ ...track, isPlaying: false });
-    }
   }, [track]);
+
+  const handleIncreaseView = async () => {
+    if (firstViewRef.current) {
+      await sendRequest<IBackendRes<IModelPaginate<ITrackLike>>>({
+        url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/tracks/increase-view`,
+        method: "POST",
+        body: {
+          trackId: track?._id,
+        },
+      });
+
+      await sendRequest<IBackendRes<any>>({
+        url: `/api/revalidate`,
+        method: "POST",
+        queryParams: {
+          tag: "track-by-id",
+          secret: "justArandomString",
+        },
+      });
+      router.refresh();
+      firstViewRef.current = false;
+    }
+  };
 
   return (
     <div style={{ marginTop: 20 }}>
@@ -164,82 +186,75 @@ const WaveTrack = (props: IProps) => {
           display: "flex",
           gap: 15,
           padding: 20,
-          height: 250,
+          height: 400,
           background:
             "linear-gradient(135deg, rgb(106, 112, 67) 0%, rgb(11, 15, 20) 100%)",
         }}
       >
-        {/* Left Side (Text + Waveform) */}
         <div
+          className="left"
           style={{
             width: "75%",
+            height: "calc(100% - 10px)",
             display: "flex",
             flexDirection: "column",
             justifyContent: "space-between",
           }}
         >
-          {track?.title}
-          <div style={{ display: "flex", alignItems: "center", gap: 15 }}>
-            {/* Play Button */}
-            <div
-              onClick={() => {
-                onPlayClick();
-                if (track && wavesurfer) {
-                  setCurrentTrack({
-                    ...currentTrack,
-                    isPlaying: false,
-                  });
-                }
-              }}
-              style={{
-                borderRadius: "50%",
-                background: "#f50",
-                height: "50px",
-                width: "50px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-              }}
-            >
-              {isPlaying ? (
-                <PauseIcon sx={{ fontSize: 30, color: "white" }} />
-              ) : (
-                <PlayArrowIcon sx={{ fontSize: 30, color: "white" }} />
-              )}
-            </div>
-
-            {/* Title + Host */}
-            <div style={{ display: "flex", flexDirection: "column" }}>
+          <div className="info" style={{ display: "flex" }}>
+            <div>
               <div
+                onClick={() => {
+                  onPlayClick();
+                  handleIncreaseView();
+                  if (track && wavesurfer) {
+                    setCurrentTrack({ ...currentTrack, isPlaying: false });
+                  }
+                }}
                 style={{
-                  color: "white",
-                  fontWeight: "bold",
-                  fontSize: "18px",
-                  padding: "4px 8px",
-                  background: "rgba(0,0,0,0.4)",
-                  borderRadius: "4px",
+                  borderRadius: "50%",
+                  background: "#f50",
+                  height: "50px",
+                  width: "50px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
                 }}
               >
-                {track?.title || "Đang tải tiêu đề..."}
+                {isPlaying === true ? (
+                  <PauseIcon sx={{ fontSize: 30, color: "white" }} />
+                ) : (
+                  <PlayArrowIcon sx={{ fontSize: 30, color: "white" }} />
+                )}
+              </div>
+            </div>
+            <div style={{ marginLeft: 20 }}>
+              <div
+                style={{
+                  padding: "0 5px",
+                  background: "#333",
+                  fontSize: 30,
+                  width: "fit-content",
+                  color: "white",
+                }}
+              >
+                {track?.title}
               </div>
               <div
                 style={{
-                  color: "#ccc",
-                  fontSize: "14px",
-                  padding: "2px 6px",
-                  background: "rgba(0,0,0,0.2)",
-                  borderRadius: "4px",
-                  marginTop: "4px",
+                  padding: "0 5px",
+                  marginTop: 10,
+                  background: "#333",
+                  fontSize: 20,
                   width: "fit-content",
+                  color: "white",
                 }}
               >
-                with {track?.uploader?.name || track?.description}
+                {track?.description}
               </div>
             </div>
           </div>
-
-          {/* Waveform */}
           <div ref={containerRef} className="wave-form-container">
             <div className="time">{time}</div>
             <div className="duration">{duration}</div>
@@ -251,33 +266,72 @@ const WaveTrack = (props: IProps) => {
                 height: "30px",
                 width: "100%",
                 bottom: "0",
+                // background: "#ccc"
                 backdropFilter: "brightness(0.5)",
               }}
             ></div>
+            <div className="comments" style={{ position: "relative" }}>
+              {comments?.map((item) => {
+                return (
+                  <Tooltip title={item.content} arrow key={item._id}>
+                    <Image
+                      onPointerMove={(e) => {
+                        const hover = hoverRef.current!;
+                        hover.style.width = calLeft(item.moment);
+                      }}
+                      src={fetchDefaultImages(item.user.type)}
+                      alt="user comment"
+                      height={20}
+                      width={20}
+                      style={{
+                        position: "absolute",
+                        top: 71,
+                        zIndex: 20,
+                        left: calLeft(item.moment),
+                      }}
+                    />
+                  </Tooltip>
+                );
+              })}
+            </div>
           </div>
         </div>
-
-        {/* Right Side (Image Placeholder) */}
         <div
+          className="right"
           style={{
             width: "25%",
+            padding: 15,
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
           }}
         >
-          <img
-            src={typeof track?.imgUrl === "string" ? track?.imgUrl : noIMG.src}
-            alt="No image"
-            style={{
-              width: "100%",
-              height: "auto",
-              maxHeight: "200px",
-              objectFit: "cover",
-              background: "#ccc",
-            }}
-          />
+          {track?.imgUrl ? (
+            <Image
+              src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/images/${track?.imgUrl}`}
+              width={250}
+              height={250}
+              alt="image track"
+            />
+          ) : (
+            <div
+              style={{
+                background: "#ccc",
+                width: 250,
+                height: 250,
+              }}
+            ></div>
+          )}
         </div>
+      </div>
+      <div>
+        <LikeTrack track={track} />
+      </div>
+      <div>
+        <CommentTrack
+          comments={comments}
+          track={track}
+          wavesurfer={wavesurfer}
+        />
       </div>
     </div>
   );

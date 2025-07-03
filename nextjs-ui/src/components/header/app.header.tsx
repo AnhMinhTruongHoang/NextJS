@@ -22,6 +22,7 @@ import { useRouter } from "next/navigation";
 import NextLink from "next/link";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
+import { fetchDefaultImages } from "@/utils/api";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -214,9 +215,17 @@ export default function AppHeader() {
                       <NotificationsIcon />
                     </Badge>
                   </IconButton>
-                  <IconButton onClick={handleProfileMenuOpen}>
-                    <Avatar sx={{ width: 32, height: 32 }}>AM</Avatar>
-                  </IconButton>
+
+                  <Avatar
+                    onClick={handleProfileMenuOpen}
+                    style={{
+                      height: 35,
+                      width: 35,
+                      cursor: "pointer",
+                    }}
+                    src={fetchDefaultImages(session.user.type)}
+                    alt="/images/noimage.png"
+                  />
                 </>
               ) : (
                 <Link href={"/auth/signin"}>Login</Link>

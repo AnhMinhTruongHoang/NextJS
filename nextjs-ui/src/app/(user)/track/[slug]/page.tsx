@@ -1,16 +1,52 @@
-"use client";
 import WaveTrack from "@/components/wave-track/wave-track";
-import { useSearchParams } from "next/navigation";
 import { Container } from "@mui/material";
 import { sendRequest } from "@/utils/api";
+import { Metadata, ResolvingMetadata } from "next";
+import slugify from "slugify";
 
-const DetailTrackPage = async (props: any) => {
-  const searchParams = useSearchParams();
-  const search = searchParams.get("search");
-  const { params } = props;
+type IProps = {
+  params: { slug: string };
+  searchParams: { [key: string]: string | string[] | undefined };
+};
 
+// Meta data
+export async function generateMetadata(
+  { params }: IProps,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const temp = params?.slug?.split(".html") ?? [];
+  const temp1 = (temp[0].split("_") ?? []) as string[];
+  const id = temp1[temp1.length - 1];
   const res = await sendRequest<IBackendRes<ITracksTop>>({
-    url: `http://localhost:8000/api/v1/tracks/${params.slug}`,
+    url: `http://localhost:8000/api/v1/tracks/${id}`,
+    method: "GET",
+    nextOption: { cache: "no-store" },
+  });
+
+  return {
+    title: res.data?.title ?? "Track Detail",
+    description: res.data?.description ?? "Track description",
+    openGraph: {
+      title: "SoundCloud",
+      description: "Beyond Your Coding Skills",
+      type: "website",
+      images: [
+        `https://raw.githubusercontent.com/AnhMinhTruongHoang/NextJS/master/FE/public/vite.svg`,
+      ],
+    },
+  };
+}
+
+//
+const DetailTrackPage = async (props: any) => {
+  //
+  const { params } = props;
+  const temp = params?.slug?.split(".html") ?? [];
+  const temp1 = (temp[0].split("_") ?? []) as string[];
+  const id = temp1[temp1.length - 1];
+  //
+  const res = await sendRequest<IBackendRes<ITracksTop>>({
+    url: `http://localhost:8000/api/v1/tracks/${id}`,
     method: "GET",
     nextOption: { cache: "no-store" },
   });
@@ -26,11 +62,14 @@ const DetailTrackPage = async (props: any) => {
     },
   });
 
+  const track = res?.data ?? null;
+  const comments = res1?.data?.result ?? [];
+
   return (
     <div>
-      <div>
-        <WaveTrack track={res?.data ?? null} />
-      </div>
+      <Container>
+        <WaveTrack track={track} comments={comments} />
+      </Container>
     </div>
   );
 };

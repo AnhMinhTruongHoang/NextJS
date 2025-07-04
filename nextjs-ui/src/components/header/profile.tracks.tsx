@@ -7,6 +7,7 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import SkipNextIcon from "@mui/icons-material/SkipNext";
 import { PauseCircleOutline } from "@mui/icons-material";
 import { useTrackContext } from "@/lib/track.wrapper";
+import { convertSlugUrl } from "@/utils/api";
 
 const ProfileTracks = ({ data }: any) => {
   const theme = useTheme();
@@ -37,7 +38,9 @@ const ProfileTracks = ({ data }: any) => {
 
       <Box sx={{ flex: 1 }}>
         <Link
-          href={`/track/${data.__id}?audio=${data.trackUrl}&id=${data._id}`}
+          href={`/track/${convertSlugUrl(data.title)}-${data.__id}.html?audio=${
+            data.trackUrl
+          }`}
           underline="none"
         >
           <Typography variant="h6" sx={{ fontWeight: 600 }}>

@@ -7,6 +7,7 @@ import Slider from "react-slick";
 import { Settings } from "react-slick";
 import { Box, Button, Divider } from "@mui/material";
 import Link from "next/link";
+import { convertSlugUrl } from "@/utils/api";
 
 interface IProps {
   data: ITracksTop[];
@@ -122,7 +123,9 @@ const MainSlider = (props: IProps) => {
                 alt="no audio"
               />
               <Link
-                href={`/track/${track._id}?audio=${track.trackUrl}$id=${track._id}`}
+                href={`/track/${convertSlugUrl(track.title)}-${
+                  track._id
+                }?audio=${track.trackUrl}$id=${track._id}`}
               >
                 <h4>{track.title}</h4>
               </Link>

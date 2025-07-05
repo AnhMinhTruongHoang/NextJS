@@ -15,7 +15,6 @@ import Image from "next/image";
 import LikeTrack from "../like/like.track";
 import CommentTrack from "../comments/commentTrack";
 
-//
 interface IProps {
   track: ITracksTop | null;
   comments: ITrackComment[];
@@ -39,49 +38,47 @@ const WaveTrack = (props: IProps) => {
     if (typeof window !== "undefined") {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d")!;
-      // Define the waveform gradient
       gradient = ctx.createLinearGradient(0, 0, 0, canvas.height * 1.35);
-      gradient.addColorStop(0, "#656666"); // Top color
-      gradient.addColorStop((canvas.height * 0.7) / canvas.height, "#656666"); // Top color
+      gradient.addColorStop(0, "#656666");
+      gradient.addColorStop((canvas.height * 0.7) / canvas.height, "#656666");
       gradient.addColorStop(
         (canvas.height * 0.7 + 1) / canvas.height,
         "#ffffff"
-      ); // White line
+      );
       gradient.addColorStop(
         (canvas.height * 0.7 + 2) / canvas.height,
         "#ffffff"
-      ); // White line
+      );
       gradient.addColorStop(
         (canvas.height * 0.7 + 3) / canvas.height,
         "#B1B1B1"
-      ); // Bottom color
-      gradient.addColorStop(1, "#B1B1B1"); // Bottom color
+      );
+      gradient.addColorStop(1, "#B1B1B1");
 
-      // Define the progress gradient
       progressGradient = ctx.createLinearGradient(
         0,
         0,
         0,
         canvas.height * 1.35
       );
-      progressGradient.addColorStop(0, "#EE772F"); // Top color
+      progressGradient.addColorStop(0, "#EE772F");
       progressGradient.addColorStop(
         (canvas.height * 0.7) / canvas.height,
         "#EB4926"
-      ); // Top color
+      );
       progressGradient.addColorStop(
         (canvas.height * 0.7 + 1) / canvas.height,
         "#ffffff"
-      ); // White line
+      );
       progressGradient.addColorStop(
         (canvas.height * 0.7 + 2) / canvas.height,
         "#ffffff"
-      ); // White line
+      );
       progressGradient.addColorStop(
         (canvas.height * 0.7 + 3) / canvas.height,
         "#F6B094"
-      ); // Bottom color
-      progressGradient.addColorStop(1, "#F6B094"); // Bottom color
+      );
+      progressGradient.addColorStop(1, "#F6B094");
     }
 
     return {
@@ -89,13 +86,13 @@ const WaveTrack = (props: IProps) => {
       progressColor: progressGradient,
       height: 100,
       barWidth: 3,
-      url: `/api?audio=${fileName}`,
+      url: `/api?audio=${fileName}&id=${track?._id ?? ""}`,
     };
-  }, []);
+  }, [fileName, track?._id]);
+
   const wavesurfer = useWavesurfer(containerRef, optionsMemo);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  // Initialize wavesurfer when the container mounts
-  // or any of the props change
+
   useEffect(() => {
     if (!wavesurfer) return;
     setIsPlaying(false);
@@ -126,7 +123,6 @@ const WaveTrack = (props: IProps) => {
     };
   }, [wavesurfer]);
 
-  // On play button click
   const onPlayClick = useCallback(() => {
     if (wavesurfer) {
       wavesurfer.isPlaying() ? wavesurfer.pause() : wavesurfer.play();
@@ -158,24 +154,25 @@ const WaveTrack = (props: IProps) => {
   }, [track]);
 
   const handleIncreaseView = async () => {
-    if (firstViewRef.current) {
-      await sendRequest<IBackendRes<IModelPaginate<ITrackLike>>>({
-        url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/tracks/increase-view`,
-        method: "POST",
-        body: {
-          trackId: track?._id,
-        },
-      });
-
-      await sendRequest<IBackendRes<any>>({
-        url: `/api/revalidate`,
-        method: "POST",
-        queryParams: {
-          tag: "track-by-id",
-          secret: "justArandomString",
-        },
-      });
-      router.refresh();
+    if (firstViewRef.current && track?._id) {
+      try {
+        await sendRequest<IBackendRes<IModelPaginate<ITrackLike>>>({
+          url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/tracks/increase-view`,
+          method: "POST",
+          body: { trackId: track._id },
+        });
+        await sendRequest<IBackendRes<any>>({
+          url: `/api/revalidate`,
+          method: "POST",
+          queryParams: {
+            tag: "track-by-id",
+            secret: "justArandomString",
+          },
+        });
+        router.refresh();
+      } catch (error) {
+        console.error("Error increasing view or revalidating:", error);
+      }
       firstViewRef.current = false;
     }
   };
@@ -267,33 +264,30 @@ const WaveTrack = (props: IProps) => {
                 height: "30px",
                 width: "100%",
                 bottom: "0",
-                // background: "#ccc"
                 backdropFilter: "brightness(0.5)",
               }}
             ></div>
             <div className="comments" style={{ position: "relative" }}>
-              {comments?.map((item) => {
-                return (
-                  <Tooltip title={item.content} arrow key={item._id}>
-                    <Image
-                      onPointerMove={(e) => {
-                        const hover = hoverRef.current!;
-                        hover.style.width = calLeft(item.moment);
-                      }}
-                      src={fetchDefaultImages(item.user.type)}
-                      alt="user comment"
-                      height={20}
-                      width={20}
-                      style={{
-                        position: "absolute",
-                        top: 71,
-                        zIndex: 20,
-                        left: calLeft(item.moment),
-                      }}
-                    />
-                  </Tooltip>
-                );
-              })}
+              {comments?.map((item) => (
+                <Tooltip title={item.content} arrow key={item._id}>
+                  <Image
+                    onPointerMove={(e) => {
+                      const hover = hoverRef.current!;
+                      hover.style.width = calLeft(item.moment);
+                    }}
+                    src={fetchDefaultImages(item.user.type)}
+                    alt="user comment"
+                    height={20}
+                    width={20}
+                    style={{
+                      position: "absolute",
+                      top: 71,
+                      zIndex: 20,
+                      left: calLeft(item.moment),
+                    }}
+                  />
+                </Tooltip>
+              ))}
             </div>
           </div>
         </div>
@@ -314,13 +308,7 @@ const WaveTrack = (props: IProps) => {
               alt="image track"
             />
           ) : (
-            <div
-              style={{
-                background: "#ccc",
-                width: 250,
-                height: 250,
-              }}
-            ></div>
+            <div style={{ background: "#ccc", width: 250, height: 250 }}></div>
           )}
         </div>
       </div>

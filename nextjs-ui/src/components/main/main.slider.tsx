@@ -1,14 +1,16 @@
 "use client";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import Slider from "react-slick";
 import { Settings } from "react-slick";
-import { Box, Button, Divider } from "@mui/material";
+import { Box } from "@mui/material";
+import Button from "@mui/material/Button/Button";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import Divider from "@mui/material/Divider";
 import Link from "next/link";
 import { convertSlugUrl } from "@/utils/api";
-
+import Image from "next/image";
 interface IProps {
   data: ITracksTop[];
   title: string;
@@ -16,7 +18,6 @@ interface IProps {
 
 const MainSlider = (props: IProps) => {
   const { data, title } = props;
-  /////////////// next /prev
 
   const NextArrow = (props: any) => {
     return (
@@ -57,9 +58,7 @@ const MainSlider = (props: IProps) => {
     );
   };
 
-  ////////////////////
-  var settings: Settings = {
-    dots: false,
+  const settings: Settings = {
     infinite: true,
     speed: 500,
     slidesToShow: 5,
@@ -93,7 +92,7 @@ const MainSlider = (props: IProps) => {
       },
     ],
   };
-
+  //box === div
   return (
     <Box
       sx={{
@@ -118,18 +117,50 @@ const MainSlider = (props: IProps) => {
         {data.map((track) => {
           return (
             <div className="track" key={track._id}>
-              <img
-                src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/images/${track.imgUrl}`}
-                alt="no audio"
-              />
+              <div
+                style={{
+                  position: "relative",
+                  height: "150px",
+                  width: "150px",
+                }}
+              >
+                <Image
+                  alt="eric image"
+                  src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/images/${track.imgUrl}`}
+                  fill
+                  style={{
+                    objectFit: "contain",
+                  }}
+                />
+              </div>
+
               <Link
+                style={{
+                  textDecoration: "none",
+                  color: "unset",
+                  fontSize: "14px",
+                }}
                 href={`/track/${convertSlugUrl(track.title)}-${
                   track._id
-                }?audio=${track.trackUrl}$id=${track._id}`}
+                }.html?audio=${track.trackUrl}`}
               >
-                <h4>{track.title}</h4>
+                <div
+                  style={{
+                    margin: "12px 0 15px 0",
+                  }}
+                >
+                  {track.title}
+                </div>
               </Link>
-              <h5>{track.description}</h5>
+              <div
+                style={{
+                  marginBottom: "7px",
+                  color: "#ccc",
+                  fontSize: "13px",
+                }}
+              >
+                {track.description}
+              </div>
             </div>
           );
         })}
@@ -138,4 +169,5 @@ const MainSlider = (props: IProps) => {
     </Box>
   );
 };
+
 export default MainSlider;

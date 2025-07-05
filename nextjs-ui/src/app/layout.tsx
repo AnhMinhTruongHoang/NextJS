@@ -11,6 +11,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
+          
         <ThemeRegistry>
           <NextAuthWrapper>
             <ToastProvider>

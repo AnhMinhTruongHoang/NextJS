@@ -1,6 +1,6 @@
-import React from "react";
+const PlayListPage = async () => {
+  await new Promise((resolve) => setTimeout(resolve, 3000));
 
-const PlayListPage = () => {
   return <div>playlist</div>;
 };
 

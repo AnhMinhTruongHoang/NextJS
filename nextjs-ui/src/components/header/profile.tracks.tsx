@@ -31,7 +31,7 @@ const ProfileTracks = ({ data }: any) => {
     >
       <Avatar
         variant="rounded"
-        src={`http://localhost:8000/images/${data.imgUrl}`}
+        src={`${process.env.NEXT_PUBLIC_BACKEND_URL}images/${data.imgUrl}`}
         alt={data.title}
         sx={{ width: 80, height: 80, mr: 2 }}
       />

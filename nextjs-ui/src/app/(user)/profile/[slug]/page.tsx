@@ -7,7 +7,7 @@ const ProfileUserPage = async ({ params }: { params: { slug: string } }) => {
   const slug = params.slug;
 
   const data = await sendRequest({
-    url: "http://localhost:8000/api/v1/tracks/users?current=1&pageSize=10",
+    url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/tracks/users?current=1&pageSize=10`,
     method: "POST",
     body: { id: slug },
   });

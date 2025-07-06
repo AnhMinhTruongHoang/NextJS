@@ -1,7 +1,6 @@
 import Container from "@mui/material/Container";
 import { sendRequest } from "@/utils/api";
 import { notFound } from "next/navigation";
-
 import type { Metadata, ResolvingMetadata } from "next";
 import WaveTrack from "@/components/wave-track/wave-track";
 

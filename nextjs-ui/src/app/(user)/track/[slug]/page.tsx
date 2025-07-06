@@ -1,76 +1,93 @@
-import WaveTrack from "@/components/wave-track/wave-track";
-import { Container } from "@mui/material";
+import Container from "@mui/material/Container";
 import { sendRequest } from "@/utils/api";
-import { Metadata, ResolvingMetadata } from "next";
-import slugify from "slugify";
+import { notFound } from "next/navigation";
 
-type IProps = {
+import type { Metadata, ResolvingMetadata } from "next";
+import WaveTrack from "@/components/wave-track/wave-track";
+
+type Props = {
   params: { slug: string };
   searchParams: { [key: string]: string | string[] | undefined };
 };
 
-// Meta data
 export async function generateMetadata(
-  { params }: IProps,
+  { params, searchParams }: Props,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
   const temp = params?.slug?.split(".html") ?? [];
-  const temp1 = (temp[0].split("_") ?? []) as string[];
+  const temp1 = (temp[0]?.split("-") ?? []) as string[];
   const id = temp1[temp1.length - 1];
-  const res = await sendRequest<IBackendRes<ITracksTop>>({
-    url: `http://localhost:8000/api/v1/tracks/${id}`,
-    method: "GET",
-    nextOption: { cache: "no-store" },
-  });
 
+  const res = await sendRequest<IBackendRes<ITracksTop>>({
+    url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/tracks/${id}`,
+    method: "GET",
+  });
   return {
-    title: res.data?.title ?? "Track Detail",
-    description: res.data?.description ?? "Track description",
+    title: res.data?.title,
+    description: res.data?.description,
+
     openGraph: {
       title: "SoundCloud",
-      description: "Beyond Your Coding Skills",
+      description: "Update Beyond Your Coding Skills",
       type: "website",
       images: [
-        `https://raw.githubusercontent.com/AnhMinhTruongHoang/NextJS/master/FE/public/vite.svg`,
+        `https://raw.githubusercontent.com/hoidanit/images-hosting/master/eric.png`,
       ],
     },
   };
 }
 
-//
+export async function generateStaticParams() {
+  return [
+    { slug: "nu-hon-bisou-6507bf9cf423204f73c438cc.html" },
+    { slug: "le-luu-ly-6507bf9cf423204f73c438cf.html" },
+    { slug: "sau-con-mua-6507bf9cf423204f73c438d0.html" },
+  ];
+}
+
 const DetailTrackPage = async (props: any) => {
-  //
-  const { params } = props;
+  const { params } = props; //regx
+
   const temp = params?.slug?.split(".html") ?? [];
-  const temp1 = (temp[0].split("_") ?? []) as string[];
+  const temp1 = (temp[0]?.split("-") ?? []) as string[];
   const id = temp1[temp1.length - 1];
-  //
+
   const res = await sendRequest<IBackendRes<ITracksTop>>({
-    url: `http://localhost:8000/api/v1/tracks/${id}`,
+    url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/tracks/${id}`,
     method: "GET",
-    nextOption: { cache: "no-store" },
+    nextOption: {
+      // cache: "no-store"
+      next: { tags: ["track-by-id"] },
+    },
   });
 
   const res1 = await sendRequest<IBackendRes<IModelPaginate<ITrackComment>>>({
-    url: `http://localhost:8000/api/v1/tracks/comments`,
+    url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/tracks/comments`,
     method: "POST",
     queryParams: {
       current: 1,
       pageSize: 100,
-      trackId: params.slug,
+      trackId: id,
       sort: "-createdAt",
     },
+    nextOption: {
+      // cache: "no-store"
+      next: { tags: ["track-comment"] },
+    },
   });
+  // await new Promise(resolve => setTimeout(resolve, 5000))
 
-  const track = res?.data ?? null;
-  const comments = res1?.data?.result ?? [];
+  if (!res?.data) notFound();
 
   return (
-    <div>
-      <Container>
-        <WaveTrack track={track} comments={comments} />
-      </Container>
-    </div>
+    <Container>
+      <div>
+        <WaveTrack
+          track={res?.data ?? null}
+          comments={res1?.data?.result ?? []}
+        />
+      </div>
+    </Container>
   );
 };
 

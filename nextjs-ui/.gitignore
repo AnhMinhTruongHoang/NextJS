@@ -17,6 +17,7 @@
 .env.*.local
 .env
 .env.development
+.env.development
 .docker-compose.yml
 
 # production

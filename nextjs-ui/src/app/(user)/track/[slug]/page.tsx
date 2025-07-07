@@ -3,6 +3,7 @@ import { sendRequest } from "@/utils/api";
 import { notFound } from "next/navigation";
 import type { Metadata, ResolvingMetadata } from "next";
 import WaveTrack from "@/components/wave-track/wave-track";
+import next from "next";
 
 type Props = {
   params: { slug: string };
@@ -20,7 +21,11 @@ export async function generateMetadata(
   const res = await sendRequest<IBackendRes<ITracksTop>>({
     url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/tracks/${id}`,
     method: "GET",
+    nextOption: {
+      next: { tags: ["track-by-id"] },
+    },
   });
+
   return {
     title: res.data?.title,
     description: res.data?.description,
@@ -38,9 +43,9 @@ export async function generateMetadata(
 
 export async function generateStaticParams() {
   return [
-    { slug: "nu-hon-bisou-6507bf9cf423204f73c438cc.html" },
-    { slug: "le-luu-ly-6507bf9cf423204f73c438cf.html" },
-    { slug: "sau-con-mua-6507bf9cf423204f73c438d0.html" },
+    { slug: "nu-hon-bisou-6846fb82bb0dbdc3010844f6.html" },
+    { slug: "who-you-know-6846fb82bb0dbdc301084503.html" },
+    { slug: "send-me-on-my-way-6846fb82bb0dbdc30108450a.html" },
   ];
 }
 
@@ -74,7 +79,6 @@ const DetailTrackPage = async (props: any) => {
       next: { tags: ["track-comment"] },
     },
   });
-  // await new Promise(resolve => setTimeout(resolve, 5000))
 
   if (!res?.data) notFound();
 

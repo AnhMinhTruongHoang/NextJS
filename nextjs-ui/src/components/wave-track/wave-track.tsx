@@ -161,6 +161,7 @@ const WaveTrack = (props: IProps) => {
           method: "POST",
           body: { trackId: track._id },
         });
+
         await sendRequest<IBackendRes<any>>({
           url: `/api/revalidate`,
           method: "POST",

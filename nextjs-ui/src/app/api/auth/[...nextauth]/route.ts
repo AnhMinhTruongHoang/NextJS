@@ -6,6 +6,9 @@ import FacebookProvider from "next-auth/providers/facebook";
 import { AuthOptions } from "next-auth";
 import { sendRequest } from "@/utils/api";
 import { JWT } from "next-auth/jwt/types";
+import dayjs from "dayjs";
+
+
 
 export const authOptions: AuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,

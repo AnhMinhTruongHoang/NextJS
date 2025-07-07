@@ -1,7 +1,7 @@
-"use client"; // if you are planing to use it in the component which is not marker with use client directive this is a must
+"use client"; // if you are planning to use it in a component that is not marked as client
 
 import Link, { LinkProps } from "next/link";
-import { usePathname } from "next/navigation"; // usePathname is a hook now imported from navigation
+import { usePathname } from "next/navigation"; // usePathname is a hook now
 
 const ActiveLink = ({
   children,

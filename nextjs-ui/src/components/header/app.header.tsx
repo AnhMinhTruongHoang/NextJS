@@ -20,9 +20,9 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import MoreIcon from "@mui/icons-material/MoreVert";
 import { useRouter } from "next/navigation";
 import NextLink from "next/link";
-import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { fetchDefaultImages } from "@/utils/api";
+import ActiveLink from "./active.link";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -208,14 +208,20 @@ export default function AppHeader() {
                 "> a": {
                   color: "unset",
                   textDecoration: "unset",
+                  padding: "5px",
+                  "&.active": {
+                    background: "#3b4a59",
+                    color: "#cefaff",
+                    borderRadius: "5px",
+                  },
                 },
               }}
             >
               {session ? (
                 <>
-                  <Link href={"/playlist"}>Playlists</Link>
-                  <Link href={"/like"}>Likes</Link>
-                  <Link href={"/track/upload"}>Upload</Link>
+                  <ActiveLink href={"/playlist"}>Playlists</ActiveLink>
+                  <ActiveLink href={"/like"}>Likes</ActiveLink>
+                  <ActiveLink href={"/track/upload"}>Upload</ActiveLink>
                   <IconButton size="large" color="inherit">
                     <Badge badgeContent={3} color="error">
                       <NotificationsIcon />
@@ -234,7 +240,7 @@ export default function AppHeader() {
                   />
                 </>
               ) : (
-                <Link href={"/auth/signin"}>Login</Link>
+                <ActiveLink href={"/auth/signin"}>Login</ActiveLink>
               )}
             </Box>
 

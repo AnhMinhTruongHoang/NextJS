@@ -16,7 +16,7 @@ import Link from "next/link";
 import { convertSlugUrl } from "@/utils/api";
 
 interface IProps {
-  data: ITracksTop;
+  data: ITrackTop;
 }
 const ProfileTracks = (props: IProps) => {
   const { data } = props;

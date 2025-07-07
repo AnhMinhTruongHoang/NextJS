@@ -157,7 +157,7 @@ const Step2 = (props: IProps) => {
   ];
 
   const handleSubmitForm = async () => {
-    const res = await sendRequest<IBackendRes<ITracksTop[]>>({
+    const res = await sendRequest<IBackendRes<ITrackTop[]>>({
       url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/tracks`,
       method: "POST",
       body: {

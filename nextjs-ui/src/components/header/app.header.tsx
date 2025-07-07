@@ -186,8 +186,14 @@ export default function AppHeader() {
                 <SearchIcon />
               </SearchIconWrapper>
               <StyledInputBase
-                placeholder="Search songs or artists..."
+                placeholder="Search…"
                 inputProps={{ "aria-label": "search" }}
+                onKeyDown={(e: any) => {
+                  if (e.key === "Enter") {
+                    if (e?.target?.value)
+                      router.push(`/search?q=${e?.target?.value}`);
+                  }
+                }}
               />
             </Search>
 

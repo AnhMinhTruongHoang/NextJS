@@ -14,7 +14,7 @@ dayjs.extend(relativeTime);
 
 interface IProps {
   comments: ITrackComment[];
-  track: ITracksTop | null;
+  track: ITrackTop | null;
   wavesurfer: WaveSurfer | null;
 }
 
@@ -47,7 +47,7 @@ const CommentTrack = (props: IProps) => {
         Authorization: `Bearer ${session?.access_token}`,
       },
     });
-    
+
     if (res.data) {
       setYourComment("");
 

@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { handleLikeTrackAction } from "@/utils/actions/actions";
 
 interface IProps {
-  track: ITracksTop | null;
+  track: ITrackTop | null;
 }
 const LikeTrack = (props: IProps) => {
   const { track } = props;

@@ -16,7 +16,7 @@ import LikeTrack from "../like/like.track";
 import CommentTrack from "../comments/commentTrack";
 
 interface IProps {
-  track: ITracksTop | null;
+  track: ITrackTop | null;
   comments: ITrackComment[];
 }
 

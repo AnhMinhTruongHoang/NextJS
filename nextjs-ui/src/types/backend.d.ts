@@ -2,7 +2,7 @@ export {};
 // https://bobbyhadz.com/blog/typescript-make-types-global#declare-global-types-in-typescript
 
 declare global {
-  interface ITracksTop {
+  interface ITrackTop {
     _id: string;
     title: string;
     description: string;
@@ -23,7 +23,7 @@ declare global {
     updateAt: string;
   }
 
-  interface IShareTrack extends ITracksTop {
+  interface IShareTrack extends ITrackTop {
     isPlaying: boolean;
   }
 

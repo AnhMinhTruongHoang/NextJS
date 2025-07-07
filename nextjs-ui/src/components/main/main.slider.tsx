@@ -12,7 +12,7 @@ import Link from "next/link";
 import { convertSlugUrl } from "@/utils/api";
 import Image from "next/image";
 interface IProps {
-  data: ITracksTop[];
+  data: ITrackTop[];
   title: string;
 }
 

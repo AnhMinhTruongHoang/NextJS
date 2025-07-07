@@ -20,7 +20,7 @@ interface IProps {
 const ITEMS_PER_PAGE = 6;
 
 const ProfilePage = ({ params }: IProps) => {
-  const [data, setData] = useState<ITracksTop[]>([]);
+  const [data, setData] = useState<ITrackTop[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
 
   const totalPages = Math.ceil(data.length / ITEMS_PER_PAGE);

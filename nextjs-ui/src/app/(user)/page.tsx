@@ -9,17 +9,17 @@ export default async function HomePage() {
 
   ////////////
 
-  const chills = await sendRequest<IBackendRes<ITracksTop[]>>({
+  const chills = await sendRequest<IBackendRes<ITrackTop[]>>({
     url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/tracks/top`,
     method: "POST",
     body: { category: "CHILL", limit: 10 },
   });
-  const workouts = await sendRequest<IBackendRes<ITracksTop[]>>({
+  const workouts = await sendRequest<IBackendRes<ITrackTop[]>>({
     url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/tracks/top`,
     method: "POST",
     body: { category: "WORKOUT", limit: 10 },
   });
-  const party = await sendRequest<IBackendRes<ITracksTop[]>>({
+  const party = await sendRequest<IBackendRes<ITrackTop[]>>({
     url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/tracks/top`,
     method: "POST",
     body: { category: "PARTY", limit: 10 },

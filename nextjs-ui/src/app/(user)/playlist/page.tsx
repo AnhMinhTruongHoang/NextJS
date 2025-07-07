@@ -35,7 +35,7 @@ const PlaylistPage = async () => {
     },
   });
 
-  const res1 = await sendRequest<IBackendRes<IModelPaginate<ITracksTop>>>({
+  const res1 = await sendRequest<IBackendRes<IModelPaginate<ITrackTop>>>({
     url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/tracks`,
     method: "GET",
     queryParams: { current: 1, pageSize: 100 },

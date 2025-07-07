@@ -15,9 +15,8 @@ import MenuItem from "@mui/material/MenuItem";
 import axios from "axios";
 import { useSession } from "next-auth/react";
 import { sendRequest } from "@/utils/api";
-
-import Image from "next/image";
 import { useToast } from "@/utils/toast";
+import Image from "next/image";
 
 function LinearProgressWithLabel(
   props: LinearProgressProps & { value: number }
@@ -82,8 +81,7 @@ function InputFileUpload(props: any) {
     } catch (error) {
       //@ts-ignore
       toast.error(error?.response?.data?.message);
-      //@ts-ignore
-      alert(error?.response?.data?.message);
+      // alert(error?.response?.data?.message)
     }
   };
 
@@ -187,7 +185,8 @@ const Step2 = (props: IProps) => {
       });
     } else {
       toast.error(res.message);
-      alert(res.message);
+
+      // alert(res.message)
     }
   };
 

@@ -1,60 +1,43 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
-import "../../../styles/users.css";
+import "../../styles/users.css";
 import { Table, Button, notification, Popconfirm } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { PlusOutlined } from "@ant-design/icons";
-import CreateTrackModal from "./tracks.create.modal";
-import UpdateTrackModal from "./tracks.update.modal";
+import CreateUserModal from "./create.user";
+import UpdateUserModal from "./update.user";
+import { IUsers } from "@/app/types/backend.type";
+import { deleteUserAction } from "../actions";
+import { revalidateTag } from "next/cache";
 
-// Định nghĩa kiểu dữ liệu cho người tải lên track
-export interface ITrackUploader {
-  _id: string;
-  email: string;
-  name: string;
-  role: string;
-  type: string;
-}
+const UsersTable = () => {
+  const [listUsers, setListUsers] = useState([]);
 
-// Định nghĩa kiểu dữ liệu cho một bản track
-export interface ITracks {
-  _id: string;
-  title: string;
-  description: string;
-  category: string;
-  imgUrl: string;
-  trackUrl: string;
-  countLike: number;
-  countPlay: number;
-  uploader: ITrackUploader;
-}
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-const TracksTable = () => {
-  const [listTrack, setListTrack] = useState([]); // Danh sách các track
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
 
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false); // Modal tạo mới
+  const [dataUpdate, setDataUpdate] = useState<null | IUsers>(null);
 
-  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false); // Modal cập nhật
-
-  const [dataUpdate, setDataUpdate] = useState<null | ITracks>(null); // Dữ liệu track đang sửa
-
-  const access_token = localStorage.getItem("access_token") as string; // Lấy access token
+  const access_token = localStorage.getItem("access_token") as string;
 
   const [meta, setMeta] = useState({
     current: 1,
     pageSize: 5,
     pages: 0,
     total: 0,
-  }); // Thông tin phân trang
+  });
 
-  // Gọi hàm getData khi component được mount
   useEffect(() => {
+    //update
     getData();
   }, []);
 
-  // Gọi API lấy danh sách track
+  //Promise fetch data
   const getData = async () => {
     const res = await fetch(
-      `http://localhost:8000/api/v1/tracks?current=${meta.current}&pageSize=${meta.pageSize}`,
+      `http://localhost:8000/api/v1/users?current=${meta.current}&pageSize=${meta.pageSize}`,
       {
         headers: {
           Authorization: `Bearer ${access_token}`,
@@ -64,16 +47,12 @@ const TracksTable = () => {
     );
 
     const d = await res.json();
-
-    // Nếu có lỗi thì hiện thông báo
     if (!d.data) {
       notification.error({
         message: JSON.stringify(d.message),
       });
     }
-
-    // Cập nhật danh sách track và thông tin phân trang
-    setListTrack(d.data.result);
+    setListUsers(d.data.result);
     setMeta({
       current: d.data.meta.current,
       pageSize: d.data.meta.pageSize,
@@ -82,10 +61,10 @@ const TracksTable = () => {
     });
   };
 
-  // Hàm xử lý khi đổi trang
+  ////////// change page
   const handleOnChange = async (page: number, pageSize: number) => {
     const res = await fetch(
-      `http://localhost:8000/api/v1/tracks?current=${page}&pageSize=${pageSize}`,
+      `http://localhost:8000/api/v1/users?current=${page}&pageSize=${pageSize}`,
       {
         headers: {
           Authorization: `Bearer ${access_token}`,
@@ -95,14 +74,12 @@ const TracksTable = () => {
     );
 
     const d = await res.json();
-
     if (!d.data) {
       notification.error({
         message: JSON.stringify(d.message),
       });
     }
-
-    setListTrack(d.data.result);
+    setListUsers(d.data.result);
     setMeta({
       current: d.data.meta.current,
       pageSize: d.data.meta.pageSize,
@@ -111,25 +88,14 @@ const TracksTable = () => {
     });
   };
 
-  // Hàm xác nhận xóa 1 track
-  const confirm = async (tracks: ITracks) => {
-    const res = await fetch(
-      `http://localhost:8000/api/v1/tracks/${tracks._id}`,
-      {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    const d = await res.json();
+  ////////////Delete
+  const handleDeleteUser = async (user: any) => {
+    const d = await deleteUserAction(user, access_token);
     if (d.data) {
       notification.success({
-        message: "Track Deleted.",
+        message: "Xóa user thành công.",
       });
-      await getData(); // Cập nhật lại bảng sau khi xóa
+      getData();
     } else {
       notification.error({
         message: JSON.stringify(d.message),
@@ -137,38 +103,29 @@ const TracksTable = () => {
     }
   };
 
-  // Cấu hình các cột cho bảng track
-  const columns: ColumnsType<ITracks> = [
+  //////////
+
+  const columns: ColumnsType<IUsers> = [
     {
-      title: "ID",
-      dataIndex: "id",
+      title: "Email",
+      dataIndex: "email",
       responsive: ["sm"],
-      render: (value, record) => <a>{record._id}</a>,
+      render: (value, record) => <div>{record.email}</div>,
     },
     {
-      title: "Title",
-      dataIndex: "title",
+      title: "Name",
+      dataIndex: "name",
       responsive: ["xs", "sm"],
     },
     {
-      title: "Artist",
-      dataIndex: "description",
-      responsive: ["xs", "sm"],
-    },
-    {
-      title: "Category",
-      dataIndex: "category",
+      title: "Role",
+      dataIndex: "role",
       responsive: ["md"],
-    },
-    {
-      title: "Track url",
-      dataIndex: "trackUrl",
-      responsive: ["md"],
-    },
-    {
-      title: "Uploader",
-      dataIndex: ["uploader", "name"],
-      responsive: ["md"],
+      render: (role: string) => {
+        if (role === "ADMIN") return "ADMIN";
+        if (role === "USER") return "USER";
+        return "UNKNOWN";
+      },
     },
     {
       title: "Actions",
@@ -183,7 +140,6 @@ const TracksTable = () => {
             justifyContent: "center",
           }}
         >
-          {/* Nút chỉnh sửa */}
           <Button
             onClick={() => {
               setDataUpdate(record);
@@ -193,12 +149,10 @@ const TracksTable = () => {
           >
             Edit
           </Button>
-
-          {/* Nút xóa với xác nhận */}
           <Popconfirm
             title="Delete the user"
-            description={`Are you sure to delete this user. name = ${record.title}?`}
-            onConfirm={() => confirm(record)}
+            description={`Are you sure to delete this user. name = ${record.name}?`}
+            onConfirm={() => handleDeleteUser(record)}
             okText="Yes"
             cancelText="No"
           >
@@ -211,7 +165,6 @@ const TracksTable = () => {
 
   return (
     <div>
-      {/* Tiêu đề và nút tạo mới */}
       <div
         style={{
           display: "flex",
@@ -219,7 +172,7 @@ const TracksTable = () => {
           alignItems: "center",
         }}
       >
-        <h2>Table Tracks</h2>
+        <h2>Table Users</h2>
         <div>
           <Button
             icon={<PlusOutlined />}
@@ -231,10 +184,9 @@ const TracksTable = () => {
         </div>
       </div>
 
-      {/* Bảng hiển thị dữ liệu */}
       <Table
         columns={columns}
-        dataSource={listTrack}
+        dataSource={listUsers}
         rowKey={"_id"}
         pagination={{
           current: meta.current,
@@ -248,16 +200,14 @@ const TracksTable = () => {
         }}
       />
 
-      {/* Modal tạo mới */}
-      <CreateTrackModal
+      <CreateUserModal
         access_token={access_token}
         getData={getData}
         isCreateModalOpen={isCreateModalOpen}
         setIsCreateModalOpen={setIsCreateModalOpen}
       />
 
-      {/* Modal cập nhật */}
-      <UpdateTrackModal
+      <UpdateUserModal
         access_token={access_token}
         getData={getData}
         isUpdateModalOpen={isUpdateModalOpen}
@@ -269,4 +219,4 @@ const TracksTable = () => {
   );
 };
 
-export default TracksTable;
+export default UsersTable;

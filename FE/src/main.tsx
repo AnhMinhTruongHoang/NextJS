@@ -18,7 +18,7 @@ import { Menu } from "antd";
 import "./styles/App.scss";
 import UsersPage from "./screens/user.page";
 import TracksPage from "./screens/track.page";
-import CommentsPage from "./screens/CommentsPage";
+import CommentsPage from "./screens/comments.page";
 
 const items: MenuProps["items"] = [
   {

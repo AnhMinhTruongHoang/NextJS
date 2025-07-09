@@ -7,36 +7,38 @@ import {
   Grid,
   TextField,
   Typography,
+  Snackbar,
+  Alert,
+  InputAdornment,
+  IconButton,
 } from "@mui/material";
 import LockIcon from "@mui/icons-material/Lock";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import GoogleIcon from "@mui/icons-material/Google";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import InputAdornment from "@mui/material/InputAdornment";
-import IconButton from "@mui/material/IconButton";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+
 import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import Snackbar from "@mui/material/Snackbar";
-import Alert from "@mui/material/Alert";
 
-import { useRouter } from "next/navigation";
-const AuthSignIn = (props: any) => {
+const AuthSignIn = () => {
   const router = useRouter();
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [username, setUsername] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
 
-  const [isErrorUsername, setIsErrorUsername] = useState<boolean>(false);
-  const [isErrorPassword, setIsErrorPassword] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
-  const [errorUsername, setErrorUsername] = useState<string>("");
-  const [errorPassword, setErrorPassword] = useState<string>("");
+  const [isErrorUsername, setIsErrorUsername] = useState(false);
+  const [isErrorPassword, setIsErrorPassword] = useState(false);
 
-  const [openMessage, setOpenMessage] = useState<boolean>(false);
-  const [resMessage, setResMessage] = useState<string>("");
+  const [errorUsername, setErrorUsername] = useState("");
+  const [errorPassword, setErrorPassword] = useState("");
+
+  const [openMessage, setOpenMessage] = useState(false);
+  const [resMessage, setResMessage] = useState("");
 
   const handleSubmit = async () => {
     setIsErrorUsername(false);
@@ -46,22 +48,22 @@ const AuthSignIn = (props: any) => {
 
     if (!username) {
       setIsErrorUsername(true);
-      setErrorUsername("Username is not empty.");
+      setErrorUsername("Username is required.");
       return;
     }
     if (!password) {
       setIsErrorPassword(true);
-      setErrorPassword("Password is not empty.");
+      setErrorPassword("Password is required.");
       return;
     }
 
     const res = await signIn("credentials", {
-      username: username,
-      password: password,
+      username,
+      password,
       redirect: false,
     });
+
     if (!res?.error) {
-      //redirect to home
       router.push("/");
     } else {
       setOpenMessage(true);
@@ -70,152 +72,103 @@ const AuthSignIn = (props: any) => {
   };
 
   return (
-    <Box
-      sx={
-        {
-          // backgroundImage: "linear-gradient(to bottom, #ff9aef, #fedac1, #d5e1cf, #b7e6d9)",
-          // backgroundColor: "#b7e6d9",
-          // backgroundRepeat: "no-repeat"
-        }
-      }
-    >
+    <Box sx={{ backgroundColor: "#f9f9f9", minHeight: "100vh", py: 6 }}>
       <Grid
         container
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "100vh",
-        }}
+        justifyContent="center"
+        alignItems="center"
+        sx={{ height: "100%" }}
       >
-        <Grid
-          item
-          xs={12}
-          sm={8}
-          md={5}
-          lg={4}
-          sx={{
-            boxShadow: "rgba(100, 100, 111, 0.2) 0px 7px 29px 0px",
-          }}
-        >
-          <div style={{ margin: "20px" }}>
-            <Link href="/">
+        <Grid>
+          <Link href="/" style={{ position: "absolute", top: 16, left: 16 }}>
+            <IconButton>
               <ArrowBackIcon />
-            </Link>
+            </IconButton>
+          </Link>
 
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                flexDirection: "column",
-                width: "100%",
-              }}
-            >
-              <Avatar>
-                <LockIcon />
-              </Avatar>
-
-              <div>
-                <Typography>Sign in</Typography>
-              </div>
-            </Box>
-
-            <TextField
-              onChange={(event) => setUsername(event.target.value)}
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              label="Username"
-              name="username"
-              autoFocus
-              error={isErrorUsername}
-              helperText={errorUsername}
-            />
-            <TextField
-              onChange={(event) => setPassword(event.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleSubmit();
-                }
-              }}
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type={showPassword ? "text" : "password"}
-              error={isErrorPassword}
-              helperText={errorPassword}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton onClick={() => setShowPassword(!showPassword)}>
-                      {showPassword === false ? (
-                        <VisibilityOff />
-                      ) : (
-                        <Visibility />
-                      )}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <Button
-              sx={{
-                my: 3,
-              }}
-              type="submit"
-              fullWidth
-              variant="contained"
-              color="primary"
-              onClick={handleSubmit}
-            >
+          <Box textAlign="center" mb={3}>
+            <Avatar sx={{ bgcolor: "primary.main", mx: "auto", mb: 1 }}>
+              <LockIcon />
+            </Avatar>
+            <Typography variant="h5" fontWeight="bold">
               Sign In
-            </Button>
-            <Divider>Or using</Divider>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                gap: "25px",
-                mt: 3,
-              }}
-            >
-              <Avatar
-                sx={{
-                  cursor: "pointer",
-                  bgcolor: "orange",
-                }}
-                onClick={() => {
-                  signIn("github");
-                }}
-              >
-                <GitHubIcon titleAccess="Login with Github" />
-              </Avatar>
+            </Typography>
+          </Box>
 
-              <Avatar
-                sx={{
-                  cursor: "pointer",
-                  bgcolor: "orange",
-                }}
-                onClick={() => {
-                  signIn("google");
-                }}
-              >
-                <GoogleIcon titleAccess="Login with Google" />
-              </Avatar>
-            </Box>
-          </div>
+          <TextField
+            onChange={(e) => setUsername(e.target.value)}
+            variant="outlined"
+            margin="normal"
+            fullWidth
+            label="Username"
+            name="username"
+            autoFocus
+            error={isErrorUsername}
+            helperText={errorUsername}
+          />
+
+          <TextField
+            onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+            variant="outlined"
+            margin="normal"
+            fullWidth
+            label="Password"
+            type={showPassword ? "text" : "password"}
+            error={isErrorPassword}
+            helperText={errorPassword}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={() => setShowPassword(!showPassword)}>
+                    {showPassword ? <Visibility /> : <VisibilityOff />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+
+          <Button
+            fullWidth
+            variant="contained"
+            color="primary"
+            sx={{ mt: 3, mb: 2 }}
+            onClick={handleSubmit}
+          >
+            Sign In
+          </Button>
+
+          <Divider>Or sign in with</Divider>
+
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              gap: 3,
+              mt: 3,
+            }}
+          >
+            <Avatar
+              sx={{ cursor: "pointer", bgcolor: "#333" }}
+              onClick={() => signIn("github")}
+            >
+              <GitHubIcon />
+            </Avatar>
+            <Avatar
+              sx={{ cursor: "pointer", bgcolor: "#db4437" }}
+              onClick={() => signIn("google")}
+            >
+              <GoogleIcon />
+            </Avatar>
+          </Box>
         </Grid>
       </Grid>
 
       <Snackbar
         open={openMessage}
-        // autoHideDuration={5000}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        autoHideDuration={5000}
+        onClose={() => setOpenMessage(false)}
       >
         <Alert
           onClose={() => setOpenMessage(false)}

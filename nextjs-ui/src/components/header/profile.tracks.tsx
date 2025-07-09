@@ -1,102 +1,88 @@
 "use client";
 
 import { useTheme } from "@mui/material/styles";
-import Box from "@mui/material/Box";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import CardMedia from "@mui/material/CardMedia";
-import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
-import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
+import { Box, Typography, IconButton, Avatar, Card } from "@mui/material";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import SkipNextIcon from "@mui/icons-material/SkipNext";
-import { useTrackContext } from "@/lib/track.wrapper";
 import PauseIcon from "@mui/icons-material/Pause";
+import { useTrackContext } from "@/lib/track.wrapper";
 import Link from "next/link";
 import { convertSlugUrl } from "@/utils/api";
+import "../../styles/track.profile.css";
 
 interface IProps {
   data: ITrackTop;
 }
-const ProfileTracks = (props: IProps) => {
-  const { data } = props;
+
+const ProfileTracks = ({ data }: IProps) => {
   const theme = useTheme();
   const { currentTrack, setCurrentTrack } = useTrackContext() as ITrackContext;
+  const isPlaying = currentTrack._id === data._id && currentTrack.isPlaying;
 
   return (
-    <Card sx={{ display: "flex", justifyContent: "space-between" }}>
-      <Box sx={{ display: "flex", flexDirection: "column" }}>
-        <CardContent sx={{ flex: "1 0 auto" }}>
-          <Link
-            style={{
-              textDecoration: "none",
-              color: "unset",
-            }}
-            href={`/track/${convertSlugUrl(data.title)}-${
-              data._id
-            }.html?audio=${data.trackUrl}`}
-          >
-            <Typography component="div" variant="h5">
-              {data.title}
-            </Typography>
-          </Link>
-
-          <Typography
-            variant="subtitle1"
-            color="text.secondary"
-            component="div"
-          >
-            {data.description}
-          </Typography>
-        </CardContent>
-        <Box sx={{ display: "flex", alignItems: "center", pl: 1, pb: 1 }}>
-          <IconButton aria-label="previous">
-            {theme.direction === "rtl" ? (
-              <SkipNextIcon />
-            ) : (
-              <SkipPreviousIcon />
-            )}
-          </IconButton>
-
-          {(data._id !== currentTrack._id ||
-            (data._id === currentTrack._id &&
-              currentTrack.isPlaying === false)) && (
-            <IconButton
-              aria-label="play/pause"
-              onClick={(e) => {
-                setCurrentTrack({ ...data, isPlaying: true });
-              }}
-            >
-              <PlayArrowIcon sx={{ height: 38, width: 38 }} />
-            </IconButton>
-          )}
-
-          {data._id === currentTrack._id && currentTrack.isPlaying === true && (
-            <IconButton
-              aria-label="play/pause"
-              onClick={(e) => {
-                setCurrentTrack({ ...data, isPlaying: false });
-              }}
-            >
-              <PauseIcon sx={{ height: 38, width: 38 }} />
-            </IconButton>
-          )}
-
-          <IconButton aria-label="next">
-            {theme.direction === "rtl" ? (
-              <SkipPreviousIcon />
-            ) : (
-              <SkipNextIcon />
-            )}
-          </IconButton>
-        </Box>
-      </Box>
-      <CardMedia
-        component="img"
-        sx={{ width: 151 }}
-        image={`${process.env.NEXT_PUBLIC_BACKEND_URL}/images/${data.imgUrl}`}
-        alt="Live from space album cover"
+    <Card
+      sx={{
+        display: "flex",
+        justifyContent: "space-between",
+        width: "100%",
+        maxWidth: 600,
+        borderRadius: 2,
+        boxShadow: 3,
+      }}
+    >
+      {/* Thumbnail Image */}
+      <Avatar
+        variant="rounded"
+        src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/images/${data.imgUrl}`}
+        sx={{ width: 64, height: 64, mr: 2 }}
       />
+
+      {/* Info */}
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <Link
+          href={`/track/${convertSlugUrl(data.title)}-${data._id}.html?audio=${
+            data.trackUrl
+          }`}
+          style={{ textDecoration: "none", color: "inherit" }}
+        >
+          <Typography variant="subtitle1" fontWeight="bold">
+            {data.title}
+          </Typography>
+        </Link>
+
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{
+            display: "-webkit-box",
+            WebkitLineClamp: 1,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            mt: 0.5,
+          }}
+        >
+          {data.description}
+        </Typography>
+      </Box>
+
+      {/* Play/Pause Button */}
+      <IconButton
+        onClick={() => setCurrentTrack({ ...data, isPlaying: !isPlaying })}
+        sx={{
+          backgroundColor: isPlaying ? "#ff5500" : "#eee",
+          color: isPlaying ? "#fff" : "#000",
+          ml: 2,
+          "&:hover": {
+            backgroundColor: isPlaying ? "#ff3300" : "#ddd",
+          },
+        }}
+      >
+        {isPlaying ? (
+          <PauseIcon sx={{ fontSize: 32 }} />
+        ) : (
+          <PlayArrowIcon sx={{ fontSize: 32 }} />
+        )}
+      </IconButton>
     </Card>
   );
 };

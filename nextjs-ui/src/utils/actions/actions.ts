@@ -1,9 +1,9 @@
 "use server";
 
+import { authOptions } from "@/app/api/auth/[...nextauth]/auth.options";
 import { getServerSession } from "next-auth";
-import { sendRequest } from "../api";
 import { revalidateTag } from "next/cache";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { sendRequest } from "../api";
 
 export const handleLikeTrackAction = async (
   id: string | undefined,

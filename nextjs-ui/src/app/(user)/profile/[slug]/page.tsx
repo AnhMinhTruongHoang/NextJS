@@ -1,16 +1,7 @@
 "use client";
 
 import ProfileTracks from "@/components/header/profile.tracks";
-import {
-  Container,
-  Grid,
-  IconButton,
-  Typography,
-  Box,
-  Pagination,
-} from "@mui/material";
-import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
-import SkipNextIcon from "@mui/icons-material/SkipNext";
+import { Container, Typography, Box, Pagination } from "@mui/material";
 import { useEffect, useState } from "react";
 
 interface IProps {
@@ -48,17 +39,28 @@ const ProfilePage = ({ params }: IProps) => {
 
   return (
     <Container sx={{ my: 5 }}>
-      <Typography variant="h4" fontWeight="bold" mb={4}>
+      <Typography
+        variant="h4"
+        fontWeight="bold"
+        mb={4}
+        justifyContent="center"
+        textAlign="center"
+      >
         Các track đã đăng
       </Typography>
 
-      <Grid container spacing={4}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center", // Canh giữa
+          gap: 3, // Khoảng cách giữa các track
+        }}
+      >
         {paginatedTracks.map((item, index) => (
-          <Grid item xs={12} md={6} key={index}>
-            <ProfileTracks data={item} />
-          </Grid>
+          <ProfileTracks key={index} data={item} />
         ))}
-      </Grid>
+      </Box>
 
       {totalPages > 1 && (
         <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
